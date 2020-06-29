@@ -66,7 +66,6 @@ class CardsAdapter(private val cards:List<Cards>): RecyclerView.Adapter<Recycler
         }
     }
 
-
 }
 
 class TextViewHolder(private val view:View): RecyclerView.ViewHolder(view) {

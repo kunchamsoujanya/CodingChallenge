@@ -1,7 +1,6 @@
 package com.example.codingchallenge
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,15 +9,14 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.codingchallenge.network.ApiClient
+import com.example.codingchallenge.repository.HomeRepository
 import com.example.codingchallenge.response.Cards
-import com.example.codingchallenge.response.PageData
-import kotlinx.android.synthetic.main.fragment_home.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.codingchallenge.response.EventObserver
 
 class HomeFragment: Fragment() {
     private var recyclerView: RecyclerView? = null
@@ -26,6 +24,10 @@ class HomeFragment: Fragment() {
     private var errorLayout:LinearLayout? = null
     private var errorView:TextView? = null
     private var retry:Button? = null
+
+    private val viewModel: HomeViewModel by viewModels {
+        HomeViewModelFactory(HomeRepository(ApiClient.apiServices))
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
@@ -35,39 +37,41 @@ class HomeFragment: Fragment() {
         errorView = view.findViewById(R.id.error_msg)
         retry = view.findViewById(R.id.retry)
         retry?.setOnClickListener {
-            loadData()
+           loadHomePageData()
         }
         recyclerView?.layoutManager = LinearLayoutManager(requireActivity())
-        loadData()
+        loadHomePageData()
+        init()
+
         return view;
     }
 
-    private fun loadData() {
-        if (!isOnline(requireActivity())) {
-            showErrorView("Wifi and mobile data are unavailable. \n Check your connection and try again")
-            return
-        }
-        progressBar?.visibility = View.VISIBLE
-        errorLayout?.visibility = View.GONE
+    private fun init() {
+        val itemsSize = viewModel.getHomePageCards().value?.size ?: 0
+        if (itemsSize > 0) hideLoading()
+        viewModel.getHomePageCards().observe(viewLifecycleOwner, Observer { response ->
+            if (response.isNotEmpty()) hideLoading()
+            setAdapter(response.toMutableList())
+        })
 
-        val responseCall = ApiClient.apiServices.fetchHomePageResponse()
-        responseCall.enqueue(object : Callback<PageData?> {
-            override fun onResponse(call: Call<PageData?>, response: Response<PageData?>) {
-                response.body()?.let { pageData ->
-                    progressBar?.visibility = View.GONE
-                    errorLayout?.visibility = View.GONE
-                    recyclerView?.visibility = View.VISIBLE
-                    setAdapter(pageData.page.cards)
+        viewModel.getEvents().observe(viewLifecycleOwner, EventObserver {
+            when (it) {
+                is HomeViewModel.ViewEvent.FinishedLoading -> {
+                    hideLoading()
                 }
-            }
-            override fun onFailure(call: Call<PageData?>, t: Throwable) {
-                t.message?.let {
-                    showErrorView(it)
+                is HomeViewModel.ViewEvent.ShowError -> {
+                    showErrorView(it.errorMsg)
                 }
-                Log.e("onFailure", "onFailure")
             }
         })
     }
+
+    private fun hideLoading() {
+        progressBar?.visibility = View.GONE
+        errorLayout?.visibility = View.GONE
+        recyclerView?.visibility = View.VISIBLE
+    }
+
 
     private fun showErrorView(message: String) {
         progressBar?.visibility = View.GONE
@@ -79,5 +83,13 @@ class HomeFragment: Fragment() {
     private fun setAdapter(cards: List<Cards>) {
         val adapter = CardsAdapter(cards)
         recyclerView?.adapter = adapter
+    }
+
+    private fun loadHomePageData() {
+        if (isOnline(requireActivity())) {
+            viewModel.loadHomePageCards()
+        } else {
+            showErrorView("Wifi and mobile data are unavailable. \n Check your connection and try again")
+        }
     }
 }
