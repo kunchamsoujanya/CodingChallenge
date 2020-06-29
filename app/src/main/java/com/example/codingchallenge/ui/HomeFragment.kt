@@ -1,4 +1,4 @@
-package com.example.codingchallenge
+package com.example.codingchallenge.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,10 +13,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.codingchallenge.*
+import com.example.codingchallenge.adapters.CardsAdapter
 import com.example.codingchallenge.network.ApiClient
 import com.example.codingchallenge.repository.HomeRepository
 import com.example.codingchallenge.response.Cards
 import com.example.codingchallenge.response.EventObserver
+import com.example.codingchallenge.util.isOnline
+import com.example.codingchallenge.viewmodels.HomeViewModel
+import com.example.codingchallenge.viewmodels.HomeViewModelFactory
 
 class HomeFragment: Fragment() {
     private var recyclerView: RecyclerView? = null

@@ -1,4 +1,4 @@
-package com.example.codingchallenge
+package com.example.codingchallenge.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

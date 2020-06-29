@@ -1,4 +1,4 @@
-package com.example.codingchallenge
+package com.example.codingchallenge.util
 
 import android.content.Context
 import android.net.ConnectivityManager

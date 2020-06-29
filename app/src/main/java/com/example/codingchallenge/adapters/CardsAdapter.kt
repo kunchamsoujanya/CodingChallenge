@@ -1,7 +1,6 @@
-package com.example.codingchallenge
+package com.example.codingchallenge.adapters
 
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.codingchallenge.R
 import com.example.codingchallenge.response.Card
 import com.example.codingchallenge.response.Cards
 
@@ -60,7 +60,7 @@ class CardsAdapter(private val cards:List<Cards>): RecyclerView.Adapter<Recycler
     override fun getItemViewType(position: Int): Int {
         return when(cards[position].card_type) {
             "text" -> TEXT_VIEW_TYPE
-            "title_description" ->  TITLE_VIEW_TYPE
+            "title_description" -> TITLE_VIEW_TYPE
             "image_title_description" -> IMAGE_VIEW_TYPE
             else -> -1
         }
