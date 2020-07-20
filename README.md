@@ -1,4 +1,4 @@
-# CodingChallenge
+# Sample Project using Jet Pack Components
 
 Sample App challenge developed using following Frameworks in Kotlin.
 
